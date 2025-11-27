@@ -4,6 +4,7 @@ import hayensa from '../assets/artists/hayensa.jpg';
 import sujuma from '../assets/artists/sujuma.jpg';
 import kaveri from '../assets/artists/kaveri.png';
 import sooraj from '../assets/artists/sooraj.png';
+import debayan from '../assets/artists/debayan.webp';
 
 export interface Artist {
   id: number;
@@ -67,6 +68,16 @@ export const artistsData: Artist[] = [
     name: "KAVERI",
     performanceType: "POP MUSIC PERFORMANCE",
     image: kaveri,
+    socialLinks: {
+      instagram: "https://www.instagram.com/kaveribasum?igsh=MWc1YzVzNGtlenNzaA==",
+      // youtube: "https://youtube.com/@sagarthapa"
+    }
+  },
+  {
+    id: 5,
+    name: "DEBAYAN",
+    performanceType: "POP MUSIC PERFORMANCE",
+    image: debayan,
     socialLinks: {
       instagram: "https://www.instagram.com/kaveribasum?igsh=MWc1YzVzNGtlenNzaA==",
       // youtube: "https://youtube.com/@sagarthapa"

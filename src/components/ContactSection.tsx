@@ -19,7 +19,7 @@ const ContactSection = ({
   return (
     <>
       {/* Transition Divider - Black to Coral gradient with lines */}
-      <div className="relative h-32 bg-gradient-to-b from-black via-black to-coral-primary overflow-hidden">
+      <div className="relative h-32  from-black via-black to-coral-primary overflow-hidden">
         {/* Horizontal lines effect */}
         <div className="absolute inset-0">
           {Array.from({ length: 20 }).map((_, i) => (
@@ -38,7 +38,7 @@ const ContactSection = ({
       </div>
 
       {/* Contact Section */}
-      <section className="bg-coral-primary py-16 px-4 sm:px-6 lg:px-8">
+      <section className="bg-coral-primary py-10 border px-4 sm:px-6 lg:px-8">
         <div className="max-w-[1400px] mx-auto">
           {/* Logos - Vertical on mobile, Horizontal on desktop */}
           <div className="flex flex-col sm:flex-row items-center gap-8 sm:gap-12 mb-8">
