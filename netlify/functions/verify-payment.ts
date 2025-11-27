@@ -50,15 +50,12 @@ async function generateTicketPDF(bookingData: any, qrCodeBase64: string): Promis
     format: 'a4'
   });
 
-  // Background
   doc.setFillColor(255, 107, 90);
   doc.rect(0, 0, 210, 297, 'F');
 
-  // White content area
   doc.setFillColor(255, 255, 255);
   doc.roundedRect(15, 15, 180, 267, 5, 5, 'F');
 
-  // Title
   doc.setFontSize(32);
   doc.setFont('helvetica', 'bold');
   doc.setTextColor(0, 0, 0);
@@ -68,11 +65,9 @@ async function generateTicketPDF(bookingData: any, qrCodeBase64: string): Promis
   doc.text('PRE-CHRISTMAS', 105, 55, { align: 'center' });
   doc.text('MUSICAL NIGHT', 105, 68, { align: 'center' });
 
-  // Divider
   doc.setLineWidth(0.5);
   doc.line(30, 80, 180, 80);
 
-  // Event Details
   doc.setFontSize(14);
   doc.setFont('helvetica', 'bold');
   doc.text('EVENT DETAILS', 30, 95);
@@ -83,10 +78,8 @@ async function generateTicketPDF(bookingData: any, qrCodeBase64: string): Promis
   doc.text('Time: 6:00 PM - 10:00 PM', 30, 113);
   doc.text('Venue: Habrubari, Kokrajhar, Assam 783370', 30, 121);
 
-  // Divider
   doc.line(30, 130, 180, 130);
 
-  // Ticket Holder Details
   doc.setFont('helvetica', 'bold');
   doc.setFontSize(14);
   doc.text('TICKET HOLDER', 30, 143);
@@ -98,21 +91,17 @@ async function generateTicketPDF(bookingData: any, qrCodeBase64: string): Promis
   doc.text(`Phone: ${bookingData.phone}`, 30, 169);
   doc.text(`Ticket ID: ${bookingData.ticketId}`, 30, 177);
 
-  // Divider
   doc.line(30, 186, 180, 186);
 
-  // QR Code
   doc.setFont('helvetica', 'bold');
   doc.setFontSize(14);
   doc.text('SCAN TO VERIFY', 105, 198, { align: 'center' });
 
-  // Add QR code image
   const qrX = 75;
   const qrY = 205;
   const qrSize = 60;
   doc.addImage(qrCodeBase64, 'PNG', qrX, qrY, qrSize, qrSize);
 
-  // Footer
   doc.setFontSize(10);
   doc.setFont('helvetica', 'italic');
   doc.setTextColor(128, 128, 128);
@@ -183,7 +172,7 @@ export const handler: Handler = async (event) => {
       orderId: razorpay_order_id
     };
 
-    // Generate QR code with booking details
+    // Generate QR code
     const qrData = JSON.stringify({
       ticketId,
       name: bookingData.name,
@@ -194,340 +183,188 @@ export const handler: Handler = async (event) => {
     });
 
     const qrCodeBase64 = await generateQRCode(qrData);
-
-    // Generate ticket PDF
     const ticketPDF = await generateTicketPDF(updatedBookingData, qrCodeBase64);
 
-    // CUSTOMER EMAIL - Professional, spam-proof template
+    // SIMPLIFIED CUSTOMER EMAIL - Plain text style, minimal HTML
     const customerEmail = {
       to: bookingData.email,
       from: {
         email: process.env.ORGANIZER_EMAIL!,
-        name: 'NextGen Brothers Events'
+        name: 'NextGen Brothers'
       },
       replyTo: process.env.ORGANIZER_EMAIL!,
-      subject: 'Your Pre-Christmas Musical Night Ticket Confirmation',
-      // Anti-spam headers
-      headers: {
-        'X-Priority': '1',
-        'X-MSMail-Priority': 'High',
-        'Importance': 'high',
-        'X-Entity-Ref-ID': ticketId
-      },
+      subject: 'Ticket Confirmed - Pre-Christmas Musical Night - Dec 20',
       html: `
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta http-equiv="X-UA-Compatible" content="IE=edge">
-  <title>Your Ticket is Confirmed</title>
-  <!--[if mso]>
-  <style type="text/css">
-    body, table, td {font-family: Arial, Helvetica, sans-serif !important;}
-  </style>
-  <![endif]-->
 </head>
-<body style="margin:0; padding:0; background-color:#f5f5f5; font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,'Helvetica Neue',Arial,sans-serif;">
-  <table width="100%" cellpadding="0" cellspacing="0" border="0" style="background-color:#f5f5f5; padding:20px 0;">
-    <tr>
-      <td align="center">
-        <!-- Main Container -->
-        <table width="600" cellpadding="0" cellspacing="0" border="0" style="max-width:600px; background-color:#ffffff; border-radius:8px; overflow:hidden; box-shadow:0 2px 8px rgba(0,0,0,0.1);">
-          
-          <!-- Header -->
-          <tr>
-            <td style="background-color:#FF6B5A; padding:40px 30px; text-align:center;">
-              <h1 style="margin:0; color:#ffffff; font-size:28px; font-weight:bold; letter-spacing:-0.5px;">
-                Booking Confirmed!
-              </h1>
-              <p style="margin:10px 0 0 0; color:#ffffff; font-size:16px; opacity:0.95;">
-                Your ticket is ready
-              </p>
-            </td>
-          </tr>
+<body style="font-family: Arial, sans-serif; font-size: 14px; line-height: 1.6; color: #333; max-width: 600px; margin: 0 auto; padding: 20px;">
+  
+  <p>Hi ${bookingData.name},</p>
 
-          <!-- Content -->
-          <tr>
-            <td style="padding:40px 30px;">
-              <!-- Greeting -->
-              <p style="margin:0 0 20px 0; font-size:18px; color:#333333; line-height:1.5;">
-                Hi <strong>${bookingData.name}</strong>,
-              </p>
+  <p>Your ticket for Pre-Christmas Musical Night has been confirmed.</p>
 
-              <p style="margin:0 0 25px 0; font-size:16px; color:#555555; line-height:1.6;">
-                Thank you for booking your ticket to the <strong>Pre-Christmas Musical Night</strong>! We're excited to have you join us for an unforgettable evening.
-              </p>
+  <p><strong>Ticket ID: ${ticketId}</strong></p>
 
-              <!-- Ticket ID Box -->
-              <table width="100%" cellpadding="0" cellspacing="0" border="0" style="margin:30px 0; background:linear-gradient(135deg, #FF6B5A 0%, #FF8A7A 100%); border-radius:12px;">
-                <tr>
-                  <td style="padding:30px; text-align:center;">
-                    <p style="margin:0 0 15px 0; color:#ffffff; font-size:16px; font-weight:bold; text-transform:uppercase; letter-spacing:1px;">
-                      Your Ticket ID
-                    </p>
-                    <div style="background-color:#000000; color:#ffffff; padding:15px 25px; border-radius:8px; display:inline-block; font-size:20px; font-weight:bold; letter-spacing:2px;">
-                      ${ticketId}
-                    </div>
-                  </td>
-                </tr>
-              </table>
+  <p><strong>Event Details:</strong></p>
+  <p>
+    Event: Pre-Christmas Musical Night<br>
+    Date: Friday, December 20, 2025<br>
+    Time: 6:00 PM - 10:00 PM<br>
+    Venue: Habrubari, Kokrajhar, Assam 783370<br>
+    Amount Paid: Rs 200
+  </p>
 
-              <!-- Event Details -->
-              <table width="100%" cellpadding="0" cellspacing="0" border="0" style="margin:25px 0; background-color:#f9f9f9; border-left:4px solid #FF6B5A; border-radius:4px;">
-                <tr>
-                  <td style="padding:25px;">
-                    <h3 style="margin:0 0 15px 0; color:#FF6B5A; font-size:18px; font-weight:bold;">
-                      Event Details
-                    </h3>
-                    
-                    <table width="100%" cellpadding="8" cellspacing="0" border="0">
-                      <tr style="border-bottom:1px solid #e0e0e0;">
-                        <td style="font-weight:bold; color:#555555; font-size:14px;">Event:</td>
-                        <td style="color:#333333; font-size:14px; text-align:right;">Pre-Christmas Musical Night</td>
-                      </tr>
-                      <tr style="border-bottom:1px solid #e0e0e0;">
-                        <td style="font-weight:bold; color:#555555; font-size:14px;">Date:</td>
-                        <td style="color:#333333; font-size:14px; text-align:right;">Friday, December 20, 2025</td>
-                      </tr>
-                      <tr style="border-bottom:1px solid #e0e0e0;">
-                        <td style="font-weight:bold; color:#555555; font-size:14px;">Time:</td>
-                        <td style="color:#333333; font-size:14px; text-align:right;">6:00 PM - 10:00 PM</td>
-                      </tr>
-                      <tr style="border-bottom:1px solid #e0e0e0;">
-                        <td style="font-weight:bold; color:#555555; font-size:14px;">Venue:</td>
-                        <td style="color:#333333; font-size:14px; text-align:right;">Habrubari, Kokrajhar, Assam</td>
-                      </tr>
-                      <tr>
-                        <td style="font-weight:bold; color:#555555; font-size:14px;">Amount Paid:</td>
-                        <td style="color:#10B981; font-size:16px; font-weight:bold; text-align:right;">₹200</td>
-                      </tr>
-                    </table>
-                  </td>
-                </tr>
-              </table>
+  <p><strong>Important - Please Read:</strong></p>
+  <p>
+    1. Your ticket is attached to this email as a PDF file<br>
+    2. Please bring the ticket (printed or on your phone) to the event<br>
+    3. Carry a valid government-issued ID for verification<br>
+    4. Entry is via QR code scanning<br>
+    5. Gates open at 5:30 PM<br>
+    6. This ticket is non-refundable and non-transferable
+  </p>
 
-              <!-- Important Instructions -->
-              <table width="100%" cellpadding="0" cellspacing="0" border="0" style="margin:25px 0; background-color:#FFF9E6; border:2px solid #FFD700; border-radius:8px;">
-                <tr>
-                  <td style="padding:20px;">
-                    <h4 style="margin:0 0 12px 0; color:#D97706; font-size:16px; font-weight:bold;">
-                      Important Instructions
-                    </h4>
-                    <ul style="margin:0; padding-left:20px; color:#666666; font-size:14px; line-height:1.8;">
-                      <li style="margin-bottom:8px;"><strong>Bring this ticket</strong> (printed or on your phone)</li>
-                      <li style="margin-bottom:8px;"><strong>Carry a valid ID</strong> for verification</li>
-                      <li style="margin-bottom:8px;"><strong>Entry via QR code scan</strong> - keep it ready</li>
-                      <li style="margin-bottom:8px;"><strong>Gates open at 5:30 PM</strong> - arrive early</li>
-                      <li style="margin-bottom:0;"><strong>Non-refundable</strong> and non-transferable</li>
-                    </ul>
-                  </td>
-                </tr>
-              </table>
+  <p>If you have any questions, please contact us at:</p>
+  <p>
+    Email: hype0115@gmail.com<br>
+    Phone: 6901649023<br>
+    Instagram: @nextgen.brothers
+  </p>
 
-              <p style="margin:25px 0 0 0; font-size:14px; color:#666666; line-height:1.6; text-align:center;">
-                Your ticket is attached to this email as a PDF.<br>
-                Please save it and bring it to the event.
-              </p>
+  <p>See you at the event!</p>
 
-              <!-- CTA Button -->
-              <table width="100%" cellpadding="0" cellspacing="0" border="0" style="margin:30px 0;">
-                <tr>
-                  <td align="center">
-                    <a href="https://www.instagram.com/nextgen.brothers" style="display:inline-block; background-color:#000000; color:#ffffff; padding:15px 40px; text-decoration:none; border-radius:6px; font-weight:bold; font-size:14px;">
-                      Follow Us on Instagram
-                    </a>
-                  </td>
-                </tr>
-              </table>
+  <p>
+    Best regards,<br>
+    NextGen Brothers Team<br>
+    Habrubari, Kokrajhar, Assam 783370
+  </p>
 
-              <p style="margin:30px 0 0 0; font-size:15px; color:#666666; text-align:center; line-height:1.6;">
-                See you at the event! Get ready for an amazing night! 🎵
-              </p>
-            </td>
-          </tr>
+  <hr style="border: none; border-top: 1px solid #ddd; margin: 30px 0;">
 
-          <!-- Footer -->
-          <tr>
-            <td style="background-color:#f5f5f5; padding:30px; text-align:center;">
-              <p style="margin:0 0 10px 0; font-size:14px; color:#666666;">
-                <a href="https://www.instagram.com/nextgen.brothers" style="color:#FF6B5A; text-decoration:none; margin:0 10px;">Instagram</a> •
-                <a href="mailto:hype0115@gmail.com" style="color:#FF6B5A; text-decoration:none; margin:0 10px;">Email</a> •
-                <a href="tel:6901649023" style="color:#FF6B5A; text-decoration:none; margin:0 10px;">Call Us</a>
-              </p>
-              <p style="margin:15px 0 5px 0; font-size:14px; color:#666666; font-weight:bold;">
-                NextGen Brothers
-              </p>
-              <p style="margin:5px 0; font-size:13px; color:#777777; line-height:1.6;">
-                Habrubari, Kokrajhar, Assam 783370<br>
-                hype0115@gmail.com | 6901649023
-              </p>
-              <p style="margin:20px 0 0 0; font-size:12px; color:#999999; line-height:1.5;">
-                This is an automated confirmation email.<br>
-                For support, contact us at hype0115@gmail.com
-              </p>
-              <p style="margin:15px 0 0 0; font-size:11px; color:#aaaaaa;">
-                Add hype0115@gmail.com to your contacts to ensure delivery.
-              </p>
-            </td>
-          </tr>
+  <p style="font-size: 12px; color: #666;">
+    This is an automated confirmation email for your ticket purchase. 
+    Please add hype0115@gmail.com to your email contacts to ensure you receive future updates.
+  </p>
 
-        </table>
-      </td>
-    </tr>
-  </table>
 </body>
 </html>
       `,
-      text: `
-Hi ${bookingData.name},
+      text: `Hi ${bookingData.name},
 
-Your booking for Pre-Christmas Musical Night is confirmed!
+Your ticket for Pre-Christmas Musical Night has been confirmed.
 
-TICKET ID: ${ticketId}
+Ticket ID: ${ticketId}
 
 EVENT DETAILS:
-- Date: Friday, December 20, 2025
-- Time: 6:00 PM - 10:00 PM
-- Venue: Habrubari, Kokrajhar, Assam 783370
-- Amount Paid: ₹200
+Event: Pre-Christmas Musical Night
+Date: Friday, December 20, 2025
+Time: 6:00 PM - 10:00 PM
+Venue: Habrubari, Kokrajhar, Assam 783370
+Amount Paid: Rs 200
 
-IMPORTANT:
-- Bring this ticket (printed or on phone)
-- Carry a valid ID
-- Gates open at 5:30 PM
-- Entry via QR code scan
+IMPORTANT - PLEASE READ:
+1. Your ticket is attached to this email as a PDF file
+2. Please bring the ticket (printed or on your phone) to the event
+3. Carry a valid government-issued ID for verification
+4. Entry is via QR code scanning
+5. Gates open at 5:30 PM
+6. This ticket is non-refundable and non-transferable
 
-Your ticket is attached as a PDF.
+If you have any questions, please contact us at:
+Email: hype0115@gmail.com
+Phone: 6901649023
+Instagram: @nextgen.brothers
 
 See you at the event!
 
-NextGen Brothers
-hype0115@gmail.com | 6901649023
+Best regards,
+NextGen Brothers Team
+Habrubari, Kokrajhar, Assam 783370
+
+---
+This is an automated confirmation email for your ticket purchase.
+Please add hype0115@gmail.com to your email contacts to ensure you receive future updates.
       `,
       attachments: [
         {
           content: ticketPDF.toString('base64'),
-          filename: `NextGen-Ticket-${ticketId}.pdf`,
+          filename: `Ticket-${ticketId}.pdf`,
           type: 'application/pdf',
           disposition: 'attachment'
         }
       ],
-      categories: ['ticket', 'confirmation', 'event'],
-      customArgs: {
-        event: 'pre-christmas-2025',
-        ticket_id: ticketId,
-        booking_id: bookingId
-      },
-      trackingSettings: {
-        clickTracking: {
+      mailSettings: {
+        sandboxMode: {
           enable: false
-        },
-        openTracking: {
-          enable: true
         }
       }
     };
 
-    // ORGANIZER EMAIL - Clean notification
+    // ORGANIZER EMAIL - Simple notification
     const organizerEmail = {
       to: process.env.ORGANIZER_EMAIL!,
       from: {
         email: process.env.ORGANIZER_EMAIL!,
-        name: 'NextGen Booking System'
+        name: 'Booking System'
       },
-      subject: `New Booking: ${bookingData.name} - ${ticketId}`,
-      headers: {
-        'X-Priority': '1',
-        'Importance': 'high'
-      },
+      subject: `New Booking - ${bookingData.name} - ${ticketId}`,
       html: `
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>New Booking</title>
 </head>
-<body style="margin:0; padding:20px; background-color:#f5f5f5; font-family:Arial,sans-serif;">
-  <table width="700" cellpadding="0" cellspacing="0" border="0" style="max-width:700px; margin:0 auto; background-color:#ffffff; border-radius:8px; overflow:hidden; box-shadow:0 2px 10px rgba(0,0,0,0.1);">
-    
-    <tr>
-      <td style="background-color:#000000; color:#ffffff; padding:25px 30px; text-align:center;">
-        <h2 style="margin:0; font-size:24px;">New Ticket Booking</h2>
-        <p style="margin:5px 0 0 0; opacity:0.9;">Pre-Christmas Musical Night</p>
-      </td>
+<body style="font-family: Arial, sans-serif; font-size: 14px; line-height: 1.6; color: #333; max-width: 600px; margin: 0 auto; padding: 20px;">
+  
+  <h2>New Ticket Booking Confirmed</h2>
+
+  <p><strong>Ticket ID:</strong> ${ticketId}</p>
+
+  <table style="width: 100%; border-collapse: collapse; margin: 20px 0;">
+    <tr style="border-bottom: 1px solid #ddd;">
+      <td style="padding: 8px; font-weight: bold;">Name:</td>
+      <td style="padding: 8px;">${bookingData.name}</td>
     </tr>
-
-    <tr>
-      <td style="padding:30px;">
-        <p style="margin:0 0 20px 0;">
-          <span style="display:inline-block; padding:6px 12px; background-color:#10B981; color:white; border-radius:4px; font-size:12px; font-weight:bold;">
-            ✓ CONFIRMED
-          </span>
-        </p>
-        
-        <h3 style="margin:25px 0 15px 0; color:#333;">Booking Details</h3>
-        
-        <table width="100%" cellpadding="12" cellspacing="0" border="0" style="border-collapse:collapse;">
-          <tr style="background-color:#f8f8f8; border-bottom:2px solid #ddd;">
-            <th style="text-align:left; font-weight:bold; width:40%;">Field</th>
-            <th style="text-align:left; font-weight:bold;">Value</th>
-          </tr>
-          <tr style="border-bottom:1px solid #eee;">
-            <td style="font-weight:bold;">Ticket ID</td>
-            <td>${ticketId}</td>
-          </tr>
-          <tr style="border-bottom:1px solid #eee;">
-            <td style="font-weight:bold;">Name</td>
-            <td>${bookingData.name}</td>
-          </tr>
-          <tr style="border-bottom:1px solid #eee;">
-            <td style="font-weight:bold;">Email</td>
-            <td><a href="mailto:${bookingData.email}" style="color:#FF6B5A;">${bookingData.email}</a></td>
-          </tr>
-          <tr style="border-bottom:1px solid #eee;">
-            <td style="font-weight:bold;">Phone</td>
-            <td><a href="tel:${bookingData.phone}" style="color:#FF6B5A;">${bookingData.phone}</a></td>
-          </tr>
-          <tr style="border-bottom:1px solid #eee;">
-            <td style="font-weight:bold;">Amount</td>
-            <td style="color:#10B981; font-weight:bold;">₹${bookingData.amount}</td>
-          </tr>
-          <tr style="border-bottom:1px solid #eee;">
-            <td style="font-weight:bold;">Payment ID</td>
-            <td><code style="background:#f0f0f0; padding:4px 8px; border-radius:3px; font-size:12px;">${razorpay_payment_id}</code></td>
-          </tr>
-          <tr>
-            <td style="font-weight:bold;">Booking Time</td>
-            <td>${new Date().toLocaleString('en-IN', { 
-              timeZone: 'Asia/Kolkata',
-              dateStyle: 'full',
-              timeStyle: 'short'
-            })}</td>
-          </tr>
-        </table>
-
-        <p style="margin:30px 0 0 0; padding:15px; background-color:#f0f9ff; border-left:4px solid #0284c7; border-radius:4px; font-size:14px; color:#333;">
-          <strong>Note:</strong> Customer has been sent their ticket via email with QR code.
-        </p>
-      </td>
+    <tr style="border-bottom: 1px solid #ddd;">
+      <td style="padding: 8px; font-weight: bold;">Email:</td>
+      <td style="padding: 8px;">${bookingData.email}</td>
     </tr>
-
+    <tr style="border-bottom: 1px solid #ddd;">
+      <td style="padding: 8px; font-weight: bold;">Phone:</td>
+      <td style="padding: 8px;">${bookingData.phone}</td>
+    </tr>
+    <tr style="border-bottom: 1px solid #ddd;">
+      <td style="padding: 8px; font-weight: bold;">Amount:</td>
+      <td style="padding: 8px;">Rs ${bookingData.amount}</td>
+    </tr>
+    <tr style="border-bottom: 1px solid #ddd;">
+      <td style="padding: 8px; font-weight: bold;">Payment ID:</td>
+      <td style="padding: 8px;">${razorpay_payment_id}</td>
+    </tr>
+    <tr>
+      <td style="padding: 8px; font-weight: bold;">Booking Time:</td>
+      <td style="padding: 8px;">${new Date().toLocaleString('en-IN', { timeZone: 'Asia/Kolkata' })}</td>
+    </tr>
   </table>
+
+  <p>Customer has been sent their ticket via email with QR code.</p>
+
 </body>
 </html>
       `,
-      text: `
-NEW BOOKING CONFIRMED
+      text: `NEW BOOKING CONFIRMED
 
 Ticket ID: ${ticketId}
+
 Name: ${bookingData.name}
 Email: ${bookingData.email}
 Phone: ${bookingData.phone}
-Amount: ₹${bookingData.amount}
+Amount: Rs ${bookingData.amount}
 Payment ID: ${razorpay_payment_id}
-Booking Time: ${new Date().toLocaleString('en-IN')}
+Booking Time: ${new Date().toLocaleString('en-IN', { timeZone: 'Asia/Kolkata' })}
 
 Customer has been sent their ticket via email.
       `,
@@ -541,19 +378,19 @@ Customer has been sent their ticket via email.
       ]
     };
 
-    // Send emails with error handling
+    // Send emails
     try {
       await Promise.all([
         sgMail.send(customerEmail),
         sgMail.send(organizerEmail)
       ]);
-      console.log('Emails sent successfully to:', bookingData.email, process.env.ORGANIZER_EMAIL);
+      console.log('✓ Emails sent successfully');
     } catch (emailError: any) {
-      console.error('Email sending failed:', emailError);
+      console.error('✗ Email sending failed:', emailError);
       if (emailError.response) {
-        console.error('SendGrid error details:', emailError.response.body);
+        console.error('SendGrid error:', JSON.stringify(emailError.response.body));
       }
-      // Don't throw - booking is confirmed, email failure is non-critical
+      // Don't throw - booking confirmed, email is secondary
     }
 
     return {
@@ -565,7 +402,7 @@ Customer has been sent their ticket via email.
       })
     };
   } catch (error: any) {
-    console.error('Verify payment error:', error);
+    console.error('Payment verification error:', error);
     return {
       statusCode: 500,
       body: JSON.stringify({
