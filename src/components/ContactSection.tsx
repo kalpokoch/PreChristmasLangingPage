@@ -38,7 +38,7 @@ const ContactSection = ({
       </div>
 
       {/* Contact Section */}
-      <section className="bg-coral-primary py-10 border px-4 sm:px-6 lg:px-8">
+      <section className="bg-coral-primary py-10 px-4 sm:px-6 lg:px-8">
         <div className="max-w-[1400px] mx-auto">
           {/* Logos - Vertical on mobile, Horizontal on desktop */}
           <div className="flex flex-col sm:flex-row items-center gap-8 sm:gap-12 mb-8">
