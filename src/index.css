@@ -1,0 +1,158 @@
+@import url('https://fonts.googleapis.com/css2?family=Oswald:wght@600;700&family=Roboto+Condensed:wght@700;900&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Bebas+Neue&display=swap');
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Import Google Fonts */
+
+/* Definition of the design system. All colors, gradients, fonts, etc should be defined here. 
+All colors MUST be HSL.
+*/
+
+@layer base {
+  :root {
+    /* NextGen Brothers Event Landing Page - Concert Poster Aesthetic */
+    
+    /* Primary Coral Red Background - Updated to #E9482F */
+    --background: 9 82% 55%;   /* #E9482F */
+    --foreground: 0 0% 0%;     /* Black text */
+
+    /* Coral Variants based on #E9482F */
+    --coral-primary: 9 82% 55%;      /* #E9482F */
+    --coral-secondary: 9 100% 60%;   /* #FF5A3D (lighter) */
+    --coral-light: 9 100% 70%;       /* #FF8266 (even lighter) */
+    --coral-dark: 9 82% 47%;         /* #D13921 (darker) */
+
+    /* Gray Sections - Updated to #C0BFBF */
+    --gray-section: 0 0% 75%;        /* #C0BFBF */
+    --gray-carousel: 0 0% 75%;       /* #C0BFBF */
+    --gray-light: 0 0% 85%;          /* #D9D9D9 (lighter variant) */
+    --gray-dark: 0 0% 65%;           /* #A6A6A6 (darker variant) */
+
+    /* Core Design Tokens */
+    --primary: 0 0% 0%;              /* Black */
+    --primary-foreground: 0 0% 100%; /* White */
+
+    --secondary: 9 82% 55%;          /* #E9482F Coral */
+    --secondary-foreground: 0 0% 100%; /* White for better contrast */
+
+    --accent: 0 0% 75%;              /* #C0BFBF Gray */
+    --accent-foreground: 0 0% 0%;
+
+    --card: 0 0% 100%;
+    --card-foreground: 0 0% 0%;
+
+    --muted: 0 0% 75%;               /* #C0BFBF */
+    --muted-foreground: 0 0% 20%;
+
+    --border: 0 0% 20%;              /* Dark border for placeholders */
+    --input: 0 0% 75%;               /* #C0BFBF */
+    --ring: 0 0% 0%;
+
+    --radius: 0.375rem;
+
+    /* Button Variants */
+    --btn-hero: 0 0% 0%;             /* Black background */
+    --btn-hero-foreground: 0 0% 100%; /* White text */
+    --btn-hero-hover: 0 0% 15%;
+
+    --btn-outline: 9 82% 55%;        /* #E9482F outline */
+    --btn-outline-foreground: 0 0% 0%;
+
+    /* Font Families */
+    --font-heading: 'Roboto Condensed', 'Oswald', 'Impact', 'Arial Black', sans-serif;
+    --font-body: 'Roboto Condensed', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+
+    /* Transitions */
+    --transition-smooth: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+
+  body {
+    @apply bg-background text-foreground antialiased;
+    font-family: var(--font-body);
+  }
+
+  /* Ultra-bold heading style for concert poster aesthetic */
+  h1, h2, h3 {
+    font-family: var(--font-heading);
+    @apply font-black tracking-tight;
+    font-weight: 900;
+    letter-spacing: -0.02em;
+  }
+
+  /* Specific heading sizes with ultra-bold condensed font */
+  h1 {
+    font-size: clamp(2.5rem, 8vw, 7rem);
+    line-height: 0.9;
+  }
+
+  h2 {
+    font-size: clamp(2rem, 5vw, 4rem);
+    line-height: 0.95;
+  }
+
+  h3 {
+    font-size: clamp(1.5rem, 3vw, 2.5rem);
+    line-height: 1;
+  }
+}
+
+@layer components {
+  /* Image Placeholder Styles */
+  .image-placeholder {
+    @apply border-2 border-dashed border-border bg-transparent relative;
+  }
+
+  .image-placeholder::after {
+    content: 'IMAGE';
+    @apply absolute inset-0 flex items-center justify-center text-border/30 text-sm font-medium tracking-wider;
+  }
+
+  /* Infinite Carousel Animation - Faster and seamless */
+  @keyframes scroll-left {
+    0% {
+      transform: translateX(0);
+    }
+    100% {
+      transform: translateX(-50%);
+    }
+  }
+
+  .animate-scroll-left {
+    animation: scroll-left 15s linear infinite;
+  }
+  @media (max-width: 768px) {
+    .animate-scroll-mobile {
+      animation: scroll-left 8s linear infinite;
+    }
+  }
+  /* Hover Scale Effect */
+  .hover-scale {
+    @apply transition-transform duration-300 ease-out;
+  }
+
+  .hover-scale:hover {
+    @apply scale-105;
+  }
+
+  /* Smooth Scroll */
+  html {
+    scroll-behavior: smooth;
+  }
+}
+@layer utilities {
+  .delay-300 {
+    transition-delay: 300ms;
+  }
+  
+  .delay-500 {
+    transition-delay: 500ms;
+  }
+}
