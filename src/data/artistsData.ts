@@ -79,7 +79,7 @@ export const artistsData: Artist[] = [
     performanceType: "POP MUSIC PERFORMANCE",
     image: debayan,
     socialLinks: {
-      instagram: "https://www.instagram.com/kaveribasum?igsh=MWc1YzVzNGtlenNzaA==",
+      instagram: "https://www.instagram.com/devn___________?igsh=MTJqMmRsZjJrbm51dw==",
       // youtube: "https://youtube.com/@sagarthapa"
     }
   }
