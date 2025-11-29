@@ -1,79 +1,67 @@
-import Img1 from '../assets/rock-the-jingle/image1.png';
+import ZupiterImg from '../assets/zupiter.png';
+import FlowerImg from '../assets/flower.png';
+
+
 interface RockTheJingleSectionProps {
   bookingUrl?: string;
 }
 
+
 const RockTheJingleSection = ({ bookingUrl = "#" }: RockTheJingleSectionProps) => {
   return (
-    <section className="bg-coral-secondary py-10 sm:py-18 px-4 sm:px-6 lg:px-8">
-      <div className="max-w-[1400px] mx-auto">
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-16 items-start">
-          {/* Left Column - Heading and Image */}
-          <div className="space-y-8">
-            {/* Main Heading */}
-            <h2 className="text-5xl sm:text-6xl md:text-7xl lg:text-8xl font-black tracking-wider text-black">
-              ROCK THE
-              <br />
-              JINGLE
-            </h2>
+    <section className="relative w-full overflow-hidden">
+      {/* Top Section - Gray gradient background with photo */}
+      <div className="relative bg-gradient-to-b from-gray-500 via-gray-400 to-gray-300">
+        {/* Header Text */}
+        <div className="absolute top-0 left-0 right-0 flex justify-between items-start pt-8 sm:pt-12 px-6 sm:px-12 lg:px-16 z-10">
+          <h3 className="text-white text-[10px] sm:text-xs md:text-sm font-bold tracking-wide uppercase leading-tight">
+            WE AS NEXT GEN<br />BROTHERHOOD
+          </h3>
+          <h3 className="text-white text-[10px] sm:text-xs md:text-sm font-bold tracking-wide uppercase">
+            PROUDLY PRESENTS
+          </h3>
+        </div>
 
-            {/* Image Placeholder */}
-            <div className="w-full aspect-video image-placeholder" />
-          </div>
 
-          {/* Right Column - Christmas Ornaments and Details */}
-          <div className="flex flex-col justify-between h-full space-y-12">
-            {/* Christmas Ornaments Decoration */}
-            <div className="flex justify-end gap-4">
-              {/* Red Ornament */}
-              <div className="w-20 h-20 sm:w-24 sm:h-24 rounded-full border-4 border-black bg-coral-dark relative">
-                <div className="absolute inset-2 border-2 border-black/30 rounded-full" />
-                <div className="absolute top-0 left-1/2 -translate-x-1/2 -translate-y-2 w-3 h-4 bg-yellow-500 border-2 border-black" />
-              </div>
-              
-              {/* Green Ornament */}
-              <div className="w-20 h-20 sm:w-24 sm:h-24 rounded-full border-4 border-black bg-emerald-500 relative">
-                <div className="absolute inset-2 flex items-center justify-center">
-                  <div className="text-yellow-400 text-3xl">✦</div>
-                </div>
-                <div className="absolute top-0 left-1/2 -translate-x-1/2 -translate-y-2 w-3 h-4 bg-yellow-500 border-2 border-black" />
-              </div>
-            </div>
+        {/* Artist Photo - 19:6 Aspect Ratio, Full Person Visible */}
+        <div className="w-full aspect-[19/6] flex items-center justify-center">
+          <img 
+            src={ZupiterImg} 
+            alt="Zupiter Artist" 
+            className="w-[70%] object-contain object-center scale-[130%]"
+          />
+        </div>
+      </div>
 
-            {/* Event Details */}
-            <div className="space-y-6 text-right">
-              <div className="space-y-2">
-                <p className="text-4xl sm:text-5xl font-black text-black">20 DEC</p>
-                <p className="text-xl sm:text-2xl font-black text-black leading-tight">
-                  GOLDEN JUBILEE
-                  <br />
-                  ROAD, NEW FLYOVER
-                </p>
-              </div>
 
-              {/* Holly Decoration */}
-              <div className="flex justify-end mb-6">
-                <div className="relative">
-                  <div className="flex gap-2">
-                    <div className="w-8 h-8 bg-coral-dark rounded-full border-2 border-black" />
-                    <div className="w-8 h-8 bg-coral-dark rounded-full border-2 border-black" />
-                  </div>
-                </div>
-              </div>
+      {/* Bottom Section - Off-white/cream background */}
+      <div className="relative bg-[#f5f1ed] sm:bg-[#ebe5df] pb-16 sm:pb-20 md:pb-24">
+        {/* ZUPITER Text Overlay - Spanning both sections */}
+        <div className="absolute -top-16 sm:-top-20 md:-top-24 left-0 right-0 flex justify-center items-center px-4 z-20">
+          <h1 
+            className="text-[#ff3300] text-[4.5rem] sm:text-[6rem] md:text-[8rem] lg:text-[10rem] xl:text-[12rem] font-black tracking-widest leading-none"
+            style={{ 
+              fontFamily: 'Extenda, Impact, Arial Black, sans-serif',
+              transform: 'scaleY(400%)',
+            }}
+          >
+            ZUPITER
+          </h1>
+        </div>
 
-              {/* Book Now Button */}
-              <a
-                href={bookingUrl}
-                className="inline-block px-10 py-4 bg-black text-white font-bold text-xl uppercase tracking-wider border border-black hover:bg-gray-section"
-              >
-                BOOK NOW
-              </a>
-            </div>
-          </div>
+
+        {/* Flower/Holly decoration - Positioned over the text */}
+        <div className="relative flex justify-center pt-24 sm:pt-32 md:pt-40 lg:pt-48 z-30">
+          <img 
+            src={FlowerImg} 
+            alt="Holly decoration" 
+            className="w-20 h-20 sm:w-24 sm:h-24 md:w-28 md:h-28 object-contain"
+          />
         </div>
       </div>
     </section>
   );
 };
+
 
 export default RockTheJingleSection;
