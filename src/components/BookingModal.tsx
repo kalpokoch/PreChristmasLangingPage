@@ -73,7 +73,7 @@ const BookingModal = ({ isOpen, onClose }: BookingModalProps) => {
       const bookingRef = await addDoc(collection(db, 'bookings'), {
         ...formData,
         status: 'pending',
-        amount: 200,
+        amount: 199,
         currency: 'INR',
         createdAt: new Date().toISOString(),
         eventDate: '2025-12-20',
@@ -85,7 +85,7 @@ const BookingModal = ({ isOpen, onClose }: BookingModalProps) => {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          amount: 200,
+          amount: 199,
           bookingId: bookingRef.id,
           ...formData
         })
@@ -188,7 +188,7 @@ const BookingModal = ({ isOpen, onClose }: BookingModalProps) => {
         {/* Header */}
         <h2 className="text-2xl font-black text-black mb-2">Book Your Ticket</h2>
         <p className="text-sm text-gray-600 mb-6">
-          Pre-Christmas Musical Night | Dec 20, 6-10 PM | ₹200
+          Pre-Christmas Musical Night | Dec 20, 6-10 PM | ₹199
         </p>
 
         {/* Error Message */}
@@ -258,7 +258,7 @@ const BookingModal = ({ isOpen, onClose }: BookingModalProps) => {
             disabled={loading}
             className="w-full px-6 py-3 bg-black text-white font-bold uppercase tracking-wide hover:bg-gray-800 disabled:bg-gray-400 disabled:cursor-not-allowed transition-colors"
           >
-            {loading ? 'Processing...' : 'Pay ₹200 & Book'}
+            {loading ? 'Processing...' : 'Pay ₹199 & Book'}
           </button>
         </form>
       </div>

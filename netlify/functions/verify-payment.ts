@@ -3,8 +3,7 @@ import crypto from 'crypto';
 import Razorpay from 'razorpay';
 import sgMail from '@sendgrid/mail';
 import admin from 'firebase-admin';
-import QRCode from 'qrcode';
-import { jsPDF } from 'jspdf';
+import { generateTicketPDF, generateTicketImage, generateTicketId } from './utils/generateTicket';
 
 // Initialize Firebase Admin
 if (!admin.apps.length) {
@@ -26,90 +25,6 @@ const razorpay = new Razorpay({
   key_id: process.env.VITE_RAZORPAY_KEY_ID!,
   key_secret: process.env.RAZORPAY_KEY_SECRET!
 });
-
-// Generate QR Code as base64
-async function generateQRCode(data: string): Promise<string> {
-  try {
-    return await QRCode.toDataURL(data, {
-      errorCorrectionLevel: 'H',
-      type: 'image/png',
-      width: 300,
-      margin: 2
-    });
-  } catch (error) {
-    console.error('QR Code generation error:', error);
-    throw error;
-  }
-}
-
-// Generate ticket PDF
-async function generateTicketPDF(bookingData: any, qrCodeBase64: string): Promise<Buffer> {
-  const doc = new jsPDF({
-    orientation: 'portrait',
-    unit: 'mm',
-    format: 'a4'
-  });
-
-  doc.setFillColor(255, 107, 90);
-  doc.rect(0, 0, 210, 297, 'F');
-
-  doc.setFillColor(255, 255, 255);
-  doc.roundedRect(15, 15, 180, 267, 5, 5, 'F');
-
-  doc.setFontSize(32);
-  doc.setFont('helvetica', 'bold');
-  doc.setTextColor(0, 0, 0);
-  doc.text('NEXTGEN BROTHERS', 105, 40, { align: 'center' });
-
-  doc.setFontSize(24);
-  doc.text('PRE-CHRISTMAS', 105, 55, { align: 'center' });
-  doc.text('MUSICAL NIGHT', 105, 68, { align: 'center' });
-
-  doc.setLineWidth(0.5);
-  doc.line(30, 80, 180, 80);
-
-  doc.setFontSize(14);
-  doc.setFont('helvetica', 'bold');
-  doc.text('EVENT DETAILS', 30, 95);
-
-  doc.setFont('helvetica', 'normal');
-  doc.setFontSize(12);
-  doc.text('Date: December 20, 2025', 30, 105);
-  doc.text('Time: 6:00 PM - 10:00 PM', 30, 113);
-  doc.text('Venue: Habrubari, Kokrajhar, Assam 783370', 30, 121);
-
-  doc.line(30, 130, 180, 130);
-
-  doc.setFont('helvetica', 'bold');
-  doc.setFontSize(14);
-  doc.text('TICKET HOLDER', 30, 143);
-
-  doc.setFont('helvetica', 'normal');
-  doc.setFontSize(12);
-  doc.text(`Name: ${bookingData.name}`, 30, 153);
-  doc.text(`Email: ${bookingData.email}`, 30, 161);
-  doc.text(`Phone: ${bookingData.phone}`, 30, 169);
-  doc.text(`Ticket ID: ${bookingData.ticketId}`, 30, 177);
-
-  doc.line(30, 186, 180, 186);
-
-  doc.setFont('helvetica', 'bold');
-  doc.setFontSize(14);
-  doc.text('SCAN TO VERIFY', 105, 198, { align: 'center' });
-
-  const qrX = 75;
-  const qrY = 205;
-  const qrSize = 60;
-  doc.addImage(qrCodeBase64, 'PNG', qrX, qrY, qrSize, qrSize);
-
-  doc.setFontSize(10);
-  doc.setFont('helvetica', 'italic');
-  doc.setTextColor(128, 128, 128);
-  doc.text('Please carry this ticket and a valid ID to the event', 105, 275, { align: 'center' });
-  doc.text('For support: hype0115@gmail.com | 6901649023', 105, 282, { align: 'center' });
-
-  return Buffer.from(doc.output('arraybuffer'));
-}
 
 export const handler: Handler = async (event) => {
   if (event.httpMethod !== 'POST') {
@@ -138,17 +53,7 @@ export const handler: Handler = async (event) => {
       throw new Error('Invalid signature');
     }
 
-    // Fetch payment details from Razorpay
-    const payment = await razorpay.payments.fetch(razorpay_payment_id);
-
-    if (payment.status !== 'captured') {
-      throw new Error('Payment not captured');
-    }
-
-    // Generate unique ticket ID
-    const ticketId = `NGB-${Date.now()}-${Math.random().toString(36).substr(2, 9).toUpperCase()}`;
-
-    // Update booking in Firestore
+    // Fetch booking data first to verify amount
     const bookingRef = db.collection('bookings').doc(bookingId);
     const bookingDoc = await bookingRef.get();
     const bookingData = bookingDoc.data();
@@ -157,35 +62,57 @@ export const handler: Handler = async (event) => {
       throw new Error('Booking not found');
     }
 
+    // Fetch payment details from Razorpay
+    const payment = await razorpay.payments.fetch(razorpay_payment_id);
+
+    // 🔒 CRITICAL SECURITY: Verify payment amount matches booking
+    if (payment.amount !== bookingData.amount * 100) {
+      throw new Error('Payment amount mismatch');
+    }
+
+    // Verify payment currency
+    if (payment.currency !== 'INR') {
+      throw new Error('Invalid currency');
+    }
+
+    // Verify payment status
+    if (payment.status !== 'captured') {
+      throw new Error('Payment not captured');
+    }
+
+    // Generate unique ticket ID (NGB### format)
+    const ticketId = generateTicketId();
+
+    // Update booking in Firestore with check-in fields
     await bookingRef.update({
       status: 'confirmed',
       ticketId,
       paymentId: razorpay_payment_id,
       orderId: razorpay_order_id,
-      confirmedAt: new Date().toISOString()
+      confirmedAt: new Date().toISOString(),
+      // Initialize check-in fields
+      checkedIn: false,
+      checkedInAt: null,
+      checkedInBy: null,
+      checkInAttempts: []
     });
 
-    const updatedBookingData = {
-      ...bookingData,
-      ticketId,
-      paymentId: razorpay_payment_id,
-      orderId: razorpay_order_id
+    // Generate ticket with template + QR code
+    const ticketData = {
+      name: bookingData.name,
+      ticketId
     };
 
-    // Generate QR code
-    const qrData = JSON.stringify({
-      ticketId,
-      name: bookingData.name,
-      email: bookingData.email,
-      phone: bookingData.phone,
-      eventDate: bookingData.eventDate,
-      bookingId
-    });
+    console.log('Generating tickets for:', ticketData);
 
-    const qrCodeBase64 = await generateQRCode(qrData);
-    const ticketPDF = await generateTicketPDF(updatedBookingData, qrCodeBase64);
+    const [ticketPDF, ticketPNG] = await Promise.all([
+      generateTicketPDF(ticketData),
+      generateTicketImage(ticketData)
+    ]);
 
-    // SIMPLIFIED CUSTOMER EMAIL - Plain text style, minimal HTML
+    console.log('Tickets generated successfully');
+
+    // CUSTOMER EMAIL
     const customerEmail = {
       to: bookingData.email,
       from: {
@@ -213,8 +140,8 @@ export const handler: Handler = async (event) => {
     Event: Pre-Christmas Musical Night<br>
     Date: Friday, December 20, 2025<br>
     Time: 6:00 PM - 10:00 PM<br>
-    Venue: Habrubari, Kokrajhar, Assam 783370<br>
-    Amount Paid: Rs 200
+    Venue: Golden Jubilee Road, New Flyover, Near Goyary Car Wash<br>
+    Amount Paid: Rs ${bookingData.amount}
   </p>
 
   <p><strong>Important - Please Read:</strong></p>
@@ -222,12 +149,15 @@ export const handler: Handler = async (event) => {
     1. Your ticket is attached to this email as a PDF file<br>
     2. Please bring the ticket (printed or on your phone) to the event<br>
     3. Carry a valid government-issued ID for verification<br>
-    4. Entry is via QR code scanning<br>
+    4. Entry is via QR code scanning at Gate 1<br>
     5. Gates open at 5:30 PM<br>
     6. This ticket is non-refundable and non-transferable
   </p>
 
-  <p>If you have any questions, please contact us at:</p>
+  <h3 style="margin-top: 30px;">Ticket Preview:</h3>
+  <img src="cid:ticket_image" alt="Your Ticket" style="max-width: 100%; height: auto; border: 1px solid #ddd; border-radius: 8px;">
+
+  <p style="margin-top: 30px;">If you have any questions, please contact us at:</p>
   <p>
     Email: hype0115@gmail.com<br>
     Phone: 6901649023<br>
@@ -262,14 +192,14 @@ EVENT DETAILS:
 Event: Pre-Christmas Musical Night
 Date: Friday, December 20, 2025
 Time: 6:00 PM - 10:00 PM
-Venue: Habrubari, Kokrajhar, Assam 783370
-Amount Paid: Rs 200
+Venue: Golden Jubilee Road, New Flyover, Near Goyary Car Wash
+Amount Paid: Rs ${bookingData.amount}
 
 IMPORTANT - PLEASE READ:
 1. Your ticket is attached to this email as a PDF file
 2. Please bring the ticket (printed or on your phone) to the event
 3. Carry a valid government-issued ID for verification
-4. Entry is via QR code scanning
+4. Entry is via QR code scanning at Gate 1
 5. Gates open at 5:30 PM
 6. This ticket is non-refundable and non-transferable
 
@@ -294,6 +224,13 @@ Please add hype0115@gmail.com to your email contacts to ensure you receive futur
           filename: `Ticket-${ticketId}.pdf`,
           type: 'application/pdf',
           disposition: 'attachment'
+        },
+        {
+          content: ticketPNG.toString('base64'),
+          filename: `Ticket-${ticketId}.png`,
+          type: 'image/png',
+          disposition: 'inline',
+          content_id: 'ticket_image'
         }
       ],
       mailSettings: {
@@ -303,7 +240,7 @@ Please add hype0115@gmail.com to your email contacts to ensure you receive futur
       }
     };
 
-    // ORGANIZER EMAIL - Simple notification
+    // ORGANIZER EMAIL
     const organizerEmail = {
       to: process.env.ORGANIZER_EMAIL!,
       from: {
@@ -350,7 +287,9 @@ Please add hype0115@gmail.com to your email contacts to ensure you receive futur
     </tr>
   </table>
 
-  <p>Customer has been sent their ticket via email with QR code.</p>
+  <img src="cid:ticket_preview" alt="Ticket Preview" style="max-width: 100%; height: auto; margin-top: 20px; border: 1px solid #ddd; border-radius: 8px;">
+
+  <p style="margin-top: 20px;">Customer has been sent their ticket via email with QR code.</p>
 
 </body>
 </html>
@@ -366,7 +305,7 @@ Amount: Rs ${bookingData.amount}
 Payment ID: ${razorpay_payment_id}
 Booking Time: ${new Date().toLocaleString('en-IN', { timeZone: 'Asia/Kolkata' })}
 
-Customer has been sent their ticket via email.
+Customer has been sent their ticket via email with QR code.
       `,
       attachments: [
         {
@@ -374,6 +313,13 @@ Customer has been sent their ticket via email.
           filename: `Organizer-${ticketId}.pdf`,
           type: 'application/pdf',
           disposition: 'attachment'
+        },
+        {
+          content: ticketPNG.toString('base64'),
+          filename: `Ticket-Preview-${ticketId}.png`,
+          type: 'image/png',
+          disposition: 'inline',
+          content_id: 'ticket_preview'
         }
       ]
     };
