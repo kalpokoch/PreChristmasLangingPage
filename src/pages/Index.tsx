@@ -24,7 +24,7 @@ const Index = () => {
           <InfiniteCarousel />
         </div>
         <RockTheJingleSection bookingUrl={bookingUrl} />
-        <SnowBeatsSection bookingUrl={bookingUrl} />
+        {/* <SnowBeatsSection bookingUrl={bookingUrl} /> */}
 
         <div id='artists'>
           <ArtistSection artists={artistsData}/>
