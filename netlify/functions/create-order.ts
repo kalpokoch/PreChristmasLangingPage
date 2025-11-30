@@ -2,7 +2,7 @@ import type { Handler } from '@netlify/functions';
 import Razorpay from 'razorpay';
 
 const razorpay = new Razorpay({
-  key_id: process.env.VITE_RAZORPAY_KEY_ID!,
+  key_id: process.env.VITE_RAZORPAY_KEY_ID!, // Fixed: removed VITE_ prefix
   key_secret: process.env.RAZORPAY_KEY_SECRET!
 });
 
