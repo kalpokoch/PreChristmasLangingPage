@@ -154,6 +154,14 @@ export const handler: Handler = async (event) => {
     6. This ticket is non-refundable and non-transferable
   </p>
 
+  <div style="background-color: #fff3cd; border: 2px solid #ffc107; padding: 15px; border-radius: 6px; margin: 20px 0;">
+    <p style="margin: 0; color: #856404; font-weight: bold;">⚠️ Not seeing this email?</p>
+    <p style="margin: 8px 0 0 0; color: #856404;">
+      Please check your <strong>Spam</strong> or <strong>Promotions</strong> folder. Sometimes our emails may end up there by mistake. 
+      Add hype0115@gmail.com to your contacts to prevent this in the future.
+    </p>
+  </div>
+
   <h3 style="margin-top: 30px;">Ticket Preview:</h3>
   <img src="cid:ticket_image" alt="Your Ticket" style="max-width: 100%; height: auto; border: 1px solid #ddd; border-radius: 8px;">
 
@@ -202,6 +210,11 @@ IMPORTANT - PLEASE READ:
 4. Entry is via QR code scanning at Gate 1
 5. Gates open at 5:30 PM
 6. This ticket is non-refundable and non-transferable
+
+⚠️ NOT SEEING THIS EMAIL?
+If you don't see this email in your inbox, please check your Spam or Promotions folder. 
+Sometimes our emails may be filtered there by mistake. 
+Add hype0115@gmail.com to your contacts to prevent this in the future.
 
 If you have any questions, please contact us at:
 Email: hype0115@gmail.com
