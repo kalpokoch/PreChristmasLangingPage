@@ -5,6 +5,7 @@ import sgMail from '@sendgrid/mail';
 import admin from 'firebase-admin';
 import { generateTicketPDF, generateTicketImage, generateTicketId } from './utils/generateTicket';
 
+
 // Initialize Firebase Admin
 if (!admin.apps.length) {
   admin.initializeApp({
@@ -16,15 +17,19 @@ if (!admin.apps.length) {
   });
 }
 
+
 const db = admin.firestore();
+
 
 // Initialize SendGrid
 sgMail.setApiKey(process.env.SENDGRID_API_KEY!);
+
 
 const razorpay = new Razorpay({
   key_id: process.env.VITE_RAZORPAY_KEY_ID!,
   key_secret: process.env.RAZORPAY_KEY_SECRET!
 });
+
 
 export const handler: Handler = async (event) => {
   if (event.httpMethod !== 'POST') {
@@ -34,6 +39,7 @@ export const handler: Handler = async (event) => {
     };
   }
 
+
   try {
     const {
       razorpay_order_id,
@@ -42,6 +48,7 @@ export const handler: Handler = async (event) => {
       bookingId
     } = JSON.parse(event.body || '{}');
 
+
     // Verify signature
     const body = razorpay_order_id + '|' + razorpay_payment_id;
     const expectedSignature = crypto
@@ -49,39 +56,48 @@ export const handler: Handler = async (event) => {
       .update(body)
       .digest('hex');
 
+
     if (expectedSignature !== razorpay_signature) {
       throw new Error('Invalid signature');
     }
+
 
     // Fetch booking data first to verify amount
     const bookingRef = db.collection('bookings').doc(bookingId);
     const bookingDoc = await bookingRef.get();
     const bookingData = bookingDoc.data();
 
+
     if (!bookingData) {
       throw new Error('Booking not found');
     }
 
+
     // Fetch payment details from Razorpay
     const payment = await razorpay.payments.fetch(razorpay_payment_id);
+
 
     // 🔒 CRITICAL SECURITY: Verify payment amount matches booking
     if (payment.amount !== bookingData.amount * 100) {
       throw new Error('Payment amount mismatch');
     }
 
+
     // Verify payment currency
     if (payment.currency !== 'INR') {
       throw new Error('Invalid currency');
     }
+
 
     // Verify payment status
     if (payment.status !== 'captured') {
       throw new Error('Payment not captured');
     }
 
+
     // Generate unique ticket ID (NGB### format)
     const ticketId = generateTicketId();
+
 
     // Update booking in Firestore with check-in fields
     await bookingRef.update({
@@ -97,20 +113,25 @@ export const handler: Handler = async (event) => {
       checkInAttempts: []
     });
 
+
     // Generate ticket with template + QR code
     const ticketData = {
       name: bookingData.name,
       ticketId
     };
 
+
     console.log('Generating tickets for:', ticketData);
+
 
     const [ticketPDF, ticketPNG] = await Promise.all([
       generateTicketPDF(ticketData),
       generateTicketImage(ticketData)
     ]);
 
+
     console.log('Tickets generated successfully');
+
 
     // CUSTOMER EMAIL
     const customerEmail = {
@@ -131,9 +152,12 @@ export const handler: Handler = async (event) => {
   
   <p>Hi ${bookingData.name},</p>
 
+
   <p>Your ticket for Pre-Christmas Musical Night has been confirmed.</p>
 
+
   <p><strong>Ticket ID: ${ticketId}</strong></p>
+
 
   <p><strong>Event Details:</strong></p>
   <p>
@@ -143,6 +167,7 @@ export const handler: Handler = async (event) => {
     Venue: Golden Jubilee Road, New Flyover, Near Goyary Car Wash<br>
     Amount Paid: Rs ${bookingData.amount}
   </p>
+
 
   <p><strong>Important - Please Read:</strong></p>
   <p>
@@ -154,8 +179,18 @@ export const handler: Handler = async (event) => {
     6. This ticket is non-refundable and non-transferable
   </p>
 
+
   <h3 style="margin-top: 30px;">Ticket Preview:</h3>
   <img src="cid:ticket_image" alt="Your Ticket" style="max-width: 100%; height: auto; border: 1px solid #ddd; border-radius: 8px;">
+
+
+  <div style="background-color: #fff3cd; border-left: 4px solid #ffc107; padding: 15px; margin: 30px 0; border-radius: 4px;">
+    <p style="margin: 0; font-weight: bold; color: #856404; font-size: 16px;">⚠️ Can't find this email?</p>
+    <p style="margin: 8px 0 0 0; color: #856404;">
+      Please check your <strong>Spam</strong> or <strong>Promotions</strong> folder. If you find it there, mark this email as <strong>"Not Spam"</strong> and add <strong>hype0115@gmail.com</strong> to your contacts to ensure you receive future updates.
+    </p>
+  </div>
+
 
   <p style="margin-top: 30px;">If you have any questions, please contact us at:</p>
   <p>
@@ -164,7 +199,9 @@ export const handler: Handler = async (event) => {
     Instagram: @nextgen.brothers
   </p>
 
+
   <p>See you at the event!</p>
+
 
   <p>
     Best regards,<br>
@@ -172,21 +209,27 @@ export const handler: Handler = async (event) => {
     Habrubari, Kokrajhar, Assam 783370
   </p>
 
+
   <hr style="border: none; border-top: 1px solid #ddd; margin: 30px 0;">
+
 
   <p style="font-size: 12px; color: #666;">
     This is an automated confirmation email for your ticket purchase. 
     Please add hype0115@gmail.com to your email contacts to ensure you receive future updates.
   </p>
 
+
 </body>
 </html>
       `,
       text: `Hi ${bookingData.name},
 
+
 Your ticket for Pre-Christmas Musical Night has been confirmed.
 
+
 Ticket ID: ${ticketId}
+
 
 EVENT DETAILS:
 Event: Pre-Christmas Musical Night
@@ -194,6 +237,7 @@ Date: Friday, December 20, 2025
 Time: 6:00 PM - 10:00 PM
 Venue: Golden Jubilee Road, New Flyover, Near Goyary Car Wash
 Amount Paid: Rs ${bookingData.amount}
+
 
 IMPORTANT - PLEASE READ:
 1. Your ticket is attached to this email as a PDF file
@@ -203,16 +247,24 @@ IMPORTANT - PLEASE READ:
 5. Gates open at 5:30 PM
 6. This ticket is non-refundable and non-transferable
 
+
+⚠️ CAN'T FIND THIS EMAIL?
+Please check your SPAM or PROMOTIONS folder. If you find it there, mark this email as "Not Spam" and add hype0115@gmail.com to your contacts.
+
+
 If you have any questions, please contact us at:
 Email: hype0115@gmail.com
 Phone: 6901649023
 Instagram: @nextgen.brothers
 
+
 See you at the event!
+
 
 Best regards,
 NextGen Brothers Team
 Habrubari, Kokrajhar, Assam 783370
+
 
 ---
 This is an automated confirmation email for your ticket purchase.
@@ -240,6 +292,7 @@ Please add hype0115@gmail.com to your email contacts to ensure you receive futur
       }
     };
 
+
     // ORGANIZER EMAIL
     const organizerEmail = {
       to: process.env.ORGANIZER_EMAIL!,
@@ -258,7 +311,9 @@ Please add hype0115@gmail.com to your email contacts to ensure you receive futur
   
   <h2>New Ticket Booking Confirmed</h2>
 
+
   <p><strong>Ticket ID:</strong> ${ticketId}</p>
+
 
   <table style="width: 100%; border-collapse: collapse; margin: 20px 0;">
     <tr style="border-bottom: 1px solid #ddd;">
@@ -287,16 +342,21 @@ Please add hype0115@gmail.com to your email contacts to ensure you receive futur
     </tr>
   </table>
 
+
   <img src="cid:ticket_preview" alt="Ticket Preview" style="max-width: 100%; height: auto; margin-top: 20px; border: 1px solid #ddd; border-radius: 8px;">
 
+
   <p style="margin-top: 20px;">Customer has been sent their ticket via email with QR code.</p>
+
 
 </body>
 </html>
       `,
       text: `NEW BOOKING CONFIRMED
 
+
 Ticket ID: ${ticketId}
+
 
 Name: ${bookingData.name}
 Email: ${bookingData.email}
@@ -304,6 +364,7 @@ Phone: ${bookingData.phone}
 Amount: Rs ${bookingData.amount}
 Payment ID: ${razorpay_payment_id}
 Booking Time: ${new Date().toLocaleString('en-IN', { timeZone: 'Asia/Kolkata' })}
+
 
 Customer has been sent their ticket via email with QR code.
       `,
@@ -324,6 +385,7 @@ Customer has been sent their ticket via email with QR code.
       ]
     };
 
+
     // Send emails
     try {
       await Promise.all([
@@ -338,6 +400,7 @@ Customer has been sent their ticket via email with QR code.
       }
       // Don't throw - booking confirmed, email is secondary
     }
+
 
     return {
       statusCode: 200,
