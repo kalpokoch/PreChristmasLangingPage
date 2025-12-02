@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { X } from 'lucide-react';
 import { collection, addDoc, query, where, getDocs } from 'firebase/firestore';
 import { db } from '@/lib/firebase';
+import { useToast } from '@/hooks/use-toast';
 
 interface BookingModalProps {
   isOpen: boolean;
@@ -22,6 +23,7 @@ const BookingModal = ({ isOpen, onClose }: BookingModalProps) => {
   });
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
+  const { toast } = useToast();
 
   if (!isOpen) return null;
 
@@ -122,7 +124,11 @@ const BookingModal = ({ isOpen, onClose }: BookingModalProps) => {
             const verifyData = await verifyResponse.json();
 
             if (verifyData.success) {
-              alert('Booking confirmed! Check your email for the ticket.');
+              toast({
+                title: "Booking Confirmed! ✓",
+                description: "Check your email inbox (and spam folder) for your ticket. Keep it safe and bring it to the event.",
+                duration: 5000
+              });
               onClose();
               setFormData({ name: '', email: '', phone: '' });
             } else {
@@ -250,7 +256,7 @@ const BookingModal = ({ isOpen, onClose }: BookingModalProps) => {
           </div>
 
           <p className="text-xs text-gray-600">
-            * One ticket per person. You'll receive your ticket via email with a QR code.
+            * One ticket per person. You'll receive your ticket via email with a QR code (check the spam folder).
           </p>
 
           <button
