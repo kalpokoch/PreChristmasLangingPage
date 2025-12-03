@@ -3,6 +3,7 @@ import { X } from 'lucide-react';
 import { collection, addDoc, query, where, getDocs } from 'firebase/firestore';
 import { db } from '@/lib/firebase';
 import { useToast } from '@/hooks/use-toast';
+import TermsAndConditionsModal from './TermsAndConditionsModal';
 
 interface BookingModalProps {
   isOpen: boolean;
@@ -23,6 +24,8 @@ const BookingModal = ({ isOpen, onClose }: BookingModalProps) => {
   });
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
+  const [termsAccepted, setTermsAccepted] = useState(false);
+  const [termsModalOpen, setTermsModalOpen] = useState(false);
   const { toast } = useToast();
 
   if (!isOpen) return null;
@@ -259,15 +262,42 @@ const BookingModal = ({ isOpen, onClose }: BookingModalProps) => {
             * One ticket per person. You'll receive your ticket via email with a QR code (check the spam folder).
           </p>
 
+          {/* Terms & Conditions Checkbox */}
+          <div className="flex items-start gap-3 p-3 bg-gray-50 rounded border border-gray-200">
+            <input
+              type="checkbox"
+              id="terms"
+              checked={termsAccepted}
+              onChange={(e) => setTermsAccepted(e.target.checked)}
+              className="w-5 h-5 mt-0.5 cursor-pointer flex-shrink-0"
+            />
+            <label htmlFor="terms" className="text-sm text-gray-700 cursor-pointer flex-1">
+              I have read and agree to the{' '}
+              <button
+                type="button"
+                onClick={() => setTermsModalOpen(true)}
+                className="text-blue-600 hover:text-blue-800 underline font-semibold"
+              >
+                Terms & Conditions
+              </button>
+            </label>
+          </div>
+
           <button
             type="submit"
-            disabled={loading}
+            disabled={loading || !termsAccepted}
             className="w-full px-6 py-3 bg-black text-white font-bold uppercase tracking-wide hover:bg-gray-800 disabled:bg-gray-400 disabled:cursor-not-allowed transition-colors"
           >
             {loading ? 'Processing...' : 'Pay ₹199 & Book'}
           </button>
         </form>
       </div>
+
+      {/* Terms & Conditions Modal */}
+      <TermsAndConditionsModal 
+        isOpen={termsModalOpen} 
+        onClose={() => setTermsModalOpen(false)} 
+      />
     </div>
   );
 };
