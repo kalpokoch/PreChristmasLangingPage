@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import ZupiterImg from '../assets/zupiter.png';
 import FlowerImg from '../assets/flower.png';
 import NancyImg from '../assets/nancy.png';
+import HimalayanProjectImg from '../assets/thehimalayanproject.jpg';
 import BookingModal from './BookingModal';
 
 
@@ -24,6 +25,47 @@ const RockTheJingleSection = ({ bookingUrl = "#" }: RockTheJingleSectionProps) =
   return (
     <>
       <section className="relative w-full overflow-hidden">
+        {/* THE HIMALAYAN PROJECT Section */}
+        <div className="relative w-full">
+          {/* THE HIMALAYAN PROJECT Text Overlay */}
+          <div className="absolute top-[1/4] left-0 right-0 flex justify-center items-center z-10 px-4">
+            <div className="text-center">
+              <h1 
+                className="text-[#ff3300] text-[2.5rem] sm:text-[3.5rem] md:text-[5rem] lg:text-[7rem] xl:text-[8rem] font-black tracking-widest leading-none"
+                style={{ 
+                  fontFamily: 'Extenda, Impact, Arial Black, sans-serif',
+                }}
+              >
+                THE
+              </h1>
+              <h1 
+                className="text-[#ff3300] text-[3rem] sm:text-[4.5rem] md:text-[6.5rem] lg:text-[9rem] xl:text-[10rem] font-black tracking-widest leading-none"
+                style={{ 
+                  fontFamily: 'Extenda, Impact, Arial Black, sans-serif',
+                }}
+              >
+                HIMALAYAN
+              </h1>
+              <h1 
+                className="text-[#ff3300] text-[2.5rem] sm:text-[3.5rem] md:text-[5rem] lg:text-[7rem] xl:text-[8rem] font-black tracking-widest leading-none"
+                style={{ 
+                  fontFamily: 'Extenda, Impact, Arial Black, sans-serif',
+                }}
+              >
+                PROJECT
+              </h1>
+            </div>
+          </div>
+          {/* Himalayan Project Image */}
+          <div className="relative">
+            <img 
+              src={HimalayanProjectImg} 
+              alt="The Himalayan Project" 
+              className="w-full h-auto object-cover"
+            />
+          </div>
+        </div>
+
         {/* Top Section - Gray gradient background with photo */}
         <div className="relative bg-gradient-to-b from-gray-500 via-gray-400 to-gray-300">
           {/* Header Text */}
