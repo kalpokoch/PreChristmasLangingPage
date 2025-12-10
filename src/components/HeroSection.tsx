@@ -43,7 +43,7 @@ const HeroSection = ({ bookingUrl = "#" }: HeroSectionProps) => {
         <div className="max-w-[1400px] w-full text-center relative z-10">
           <div className="relative overflow-hidden mb-8">
             <h1 className="text-6xl sm:text-8xl md:text-9xl lg:text-[120px] font-black leading-[0.9] tracking-wider text-black">
-              PRE-CHRISTMAS
+              WINTER FEST
               <br />
               MUSICAL NIGHT
             </h1>
