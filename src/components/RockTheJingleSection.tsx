@@ -135,7 +135,7 @@ const RockTheJingleSection = ({ bookingUrl = "#" }: RockTheJingleSectionProps) =
               {/* Left: Date */}
               <div className="text-center lg:text-left">
                 <p className="text-[#ff3300] text-5xl sm:text-6xl md:text-7xl lg:text-8xl font-bold">
-                  20.11.2025
+                  20.12.2025
                 </p>
               </div>
 
